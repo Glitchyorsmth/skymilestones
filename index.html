@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyBlock Crop Profit Calculator</title>
+<style>
+:root {
+  --bg:#0f1117; --panel:#1a1d27; --panel2:#222535; --border:#2e3248;
+  --accent:#6c8aff; --green:#4ade80; --red:#f87171; --yellow:#fbbf24;
+  --text:#e2e8f0; --muted:#8892a4; --mushroom:#c084fc;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
+h1{text-align:center;padding:22px 16px 6px;font-size:1.55rem;letter-spacing:.4px}
+h1 span{color:var(--accent)}
+.sub{text-align:center;color:var(--muted);font-size:.82rem;margin-bottom:18px}
+
+/* Tabs */
+.tabs-wrap{display:flex;justify-content:center;flex-wrap:wrap;overflow-x:auto;gap:3px;padding:0 14px;border-bottom:2px solid var(--border);scrollbar-width:thin}
+.tab-btn{flex-shrink:0;padding:8px 13px;border:none;border-radius:7px 7px 0 0;background:transparent;
+  color:var(--muted);cursor:pointer;font-size:.8rem;font-weight:600;transition:all .12s;
+  border-bottom:3px solid transparent}
+.tab-btn:hover{color:var(--text);background:var(--panel2)}
+.tab-btn.active{color:var(--text);background:var(--panel);border-bottom-color:var(--accent)}
+.tab-btn.mush.active{border-bottom-color:var(--mushroom)}
+
+/* Content */
+.tab-content{display:none;padding:18px 14px;max-width:1080px;margin:0 auto}
+.tab-content.active{display:block}
+
+/* Config bar */
+.cfg{background:var(--panel);border:1px solid var(--border);border-radius:9px;
+  padding:12px 16px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-bottom:18px}
+.ci{display:flex;flex-direction:column;gap:3px}
+.ci label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.ci input,.ci select{background:var(--panel2);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);padding:6px 9px;font-size:.88rem;outline:none}
+.ci input{width:100px}
+.ci select{width:140px}
+.ci input:focus,.ci select:focus{border-color:var(--accent)}
+.cfg-note{margin-left:auto;color:var(--muted);font-size:.78rem;align-self:center}
+.cfg-note b{color:var(--text)}
+
+/* Banner */
+.banner{border-radius:9px;padding:11px 15px;margin-bottom:18px;display:flex;
+  align-items:center;gap:14px;flex-wrap:wrap;border:1px solid}
+.banner.pos{background:#0d2a1a;border-color:var(--green)}
+.blabel{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.bname{font-size:1.05rem;font-weight:700;color:var(--green)}
+.bstats{font-size:.83rem;color:var(--muted);line-height:1.5}
+.bstats b{color:var(--text)}
+
+/* Table */
+.tw{overflow-x:auto;border-radius:9px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{background:var(--panel2);padding:9px 13px;text-align:left;
+  color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;
+  cursor:pointer;user-select:none;white-space:nowrap}
+thead th:hover{color:var(--text)}
+thead th.s{color:var(--accent)}
+tbody tr{border-top:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--panel2)}
+tbody td{padding:9px 13px}
+.mn{font-weight:600}
+.vg{color:var(--green);font-weight:600}
+.vy{color:var(--yellow);font-weight:600}
+.vm{color:var(--muted)}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:700;margin-left:5px}
+.b-best{background:#14532d;color:#4ade80}
+.b-top{background:#1c3a6e;color:#93c5fd}
+.b-free{background:#292524;color:#a8a29e}
+
+/* Mobile */
+@media(max-width:640px){
+  h1{font-size:1.15rem;padding:14px 10px 4px}
+  .sub{font-size:.74rem;margin-bottom:12px}
+  .tab-btn{padding:6px 9px;font-size:.72rem}
+  .tab-content{padding:12px 8px}
+  .cfg{gap:10px;padding:10px 12px}
+  .ci input{width:80px}
+  .ci select{width:120px}
+  table{font-size:.75rem}
+  thead th{padding:7px 8px;font-size:.65rem}
+  tbody td{padding:7px 8px}
+  .banner{padding:9px 11px;gap:9px}
+  .bname{font-size:.95rem}
+  .bstats{font-size:.76rem}
+  .tw{border-radius:7px}
+}
+</style>
+</head>
+<body>
+<h1>🌿 SkyBlock <span>Crop Profit</span> Calculator</h1>
+<p class="sub">Crop Milestone Optimization · Plot-size-aware best pick · Mushrooms merged · Live data from t0r0nt0.dev</p>
+
+<div style="text-align:center;margin:0 14px 18px">
+  <a href="https://greenhouse.skyshards.com/" target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
+            background:#1a2a1a;border:1px solid #4ade80;border-radius:9px;
+            color:#4ade80;font-size:.9rem;font-weight:700;text-decoration:none;
+            transition:background .15s;letter-spacing:.3px"
+     onmouseover="this.style.background='#0d2a1a'" onmouseout="this.style.background='#1a2a1a'">
+    🌿 Plan your plot at <span style="text-decoration:underline">greenhouse.skyshards.com</span> →
+  </a>
+</div>
+
+<div class="tabs-wrap" id="tabsWrap"></div>
+<div id="tabContents"></div>
+
+<script>
+// ── DATA ── [mutation, ingredientCost, stages, timeH, drops/mutation, drops/hour]
+// Verified from t0r0nt0.dev/profit-calculator → Crop Milestone Optimization
+const RAW = {
+  "Brown Mushroom": [
+    ["Devourer",         3486978,16,68, 950, 13.97],
+    ["Puffercloud",      4935953,14,60, 665, 11.08],
+    ["Do-not-eat-shroom",  33366, 8,36, 380, 10.56],
+    ["Veilshroom",             0, 0, 4,  33,  8.25],
+    ["Thornshade",         12722, 8,36, 190,  5.28],
+    ["Brown Mushroom",         0, 6,28, 121,  4.32],
+    ["Cheesebite",        988503,10,44, 190,  4.32],
+    ["Chloronite",       3043509,10,44,  95,  2.16],
+    ["Godseed",                0,40,164,117,  0.71],
+  ],
+  "Red Mushroom": [
+    ["Devourer",         3486978,16,68, 950, 13.97],
+    ["Puffercloud",      4935953,14,60, 665, 11.08],
+    ["Do-not-eat-shroom",  33366, 8,36, 380, 10.56],
+    ["Veilshroom",             0, 0, 4,  33,  8.25],
+    ["Thornshade",         12722, 8,36, 190,  5.28],
+    ["Red Mushroom",           0, 6,28, 121,  4.32],
+    ["Cheesebite",        988503,10,44, 190,  4.32],
+    ["Chloronite",       3043509,10,44,  95,  2.16],
+    ["Godseed",                0,40,164,117,  0.71],
+  ],
+  "Cactus": [
+    ["Noctilume",        1927624, 4,20,1200, 60.00],
+    ["Glasscorn",       13868767, 9,40,2400, 60.00],
+    ["Timestalk",       18815374,14,60,3000, 50.00],
+    ["Stoplight Petal", 11515595,12,52,2400, 46.15],
+    ["Startlevine",      6681052,12,52,1500, 28.85],
+    ["Shadevine",              0, 0, 4,  68, 17.00],
+    ["Cheesebite",        988503,10,44, 600, 13.64],
+    ["Thunderling",      2200417,16,68, 900, 13.24],
+    ["Snoozling",        3097040,20,84, 600,  7.14],
+    ["Cactus",                 0, 8,36, 120,  3.33],
+    ["Godseed",                0,40,164,369,  2.25],
+  ],
+  "Carrot": [
+    ["Phantomleaf",      1630764,15,64,5600, 87.50],
+    ["Coalroot",           24885, 8,36,1400, 38.89],
+    ["Do-not-eat-shroom",  33366, 8,36,1400, 38.89],
+    ["Chorus Fruit",     1534115,12,52,1750, 33.65],
+    ["Scourroot",              0, 0, 4, 122, 30.50],
+    ["Fleshtrap",        1266353,14,60,1400, 23.33],
+    ["Chloronite",       3043509,10,44, 700, 15.91],
+    ["Carrot",                 0, 8,36, 280,  7.78],
+    ["Godseed",                0,40,164,862,  5.26],
+  ],
+  "Cocoa Bean": [
+    ["Creambloom",         24965, 6,28,1600, 57.14],
+    ["Choconut",               0, 0, 4, 200, 50.00],
+    ["Blastberry",       1069553, 6,28,1200, 42.86],
+    ["Chocoberry",         22716, 6,28, 400, 14.29],
+    ["Cocoa Bean",             0, 6,28, 160,  5.71],
+    ["Godseed",                0,40,164,492,  3.00],
+  ],
+  "Melon": [
+    ["Soggybud",            3992,10,44,3200, 72.73],
+    ["Chocoberry",         22716, 6,28,1600, 57.14],
+    ["Thunderling",      2200417,16,68,2400, 35.29],
+    ["Gloomgourd",             0, 0, 4, 140, 35.00],
+    ["Melon",                  0,11,48, 512, 10.67],
+    ["Godseed",                0,40,164,985,  6.01],
+  ],
+  "Moonflower": [
+    ["Puffercloud",      4935953,14,60,1400, 23.33],
+    ["Plantboy Advance",17776765,12,52,1200, 23.08],
+    ["Duskbloom",          10819, 8,36, 533, 14.81],
+    ["Magic Jellybean",   948753,120,484, 600,  1.24],
+    ["Snoozling",        3097040,20,84, 800,  9.52],
+    ["Moonflower",             0,15,64, 256,  4.00],
+    ["Godseed",                0,40,164,492,  3.00],
+  ],
+  "Netherwart": [
+    ["Ashwreath",              0, 0, 4, 360, 90.00],
+    ["Blastberry",       1069553, 6,28,1800, 64.29],
+    ["CinderShade",        23503, 8,36,1200, 33.33],
+    ["Coalroot",           24885, 8,36, 600, 16.67],
+    ["Netherwart",             0, 8,36, 240,  6.67],
+    ["Godseed",                0,40,164,738,  4.50],
+  ],
+  "Potato": [
+    ["Glasscorn",       13868767, 9,40,4800,120.00],
+    ["Phantomleaf",      1630764,15,64,4800, 75.00],
+    ["Do-not-eat-shroom",  33366, 8,36,1200, 33.33],
+    ["Chorus Fruit",     1534115,12,52,1500, 28.85],
+    ["Scourroot",              0, 0, 4, 105, 26.25],
+    ["Fleshtrap",        1266353,14,60,1200, 20.00],
+    ["Coalroot",           24885, 8,36, 600, 16.67],
+    ["Chloronite",       3043509,10,44, 600, 13.64],
+    ["Potato",                 0, 8,36, 240,  6.67],
+    ["Godseed",                0,40,164,738,  4.50],
+  ],
+  "Pumpkin": [
+    ["Devourer",         3486978,16,68,1700, 25.00],
+    ["Zombud",            699564,16,68,1190, 17.50],
+    ["Fleshtrap",        1266353,14,60, 680, 11.33],
+    ["Gloomgourd",             0, 0, 4,  30,  7.50],
+    ["Chocoberry",         22716, 6,28, 170,  6.07],
+    ["Pumpkin",                0,11,48, 108,  2.25],
+    ["Godseed",                0,40,164,209,  1.27],
+  ],
+  "Sugarcane": [
+    ["Timestalk",       18815374,14,60,4000, 66.67],
+    ["Chorus Fruit",     1534115,12,52,2000, 38.46],
+    ["Startlevine",      6681052,12,52,2000, 38.46],
+    ["Magic Jellybean",   948753,120,484, 1200,  2.48],
+    ["Shadevine",              0, 0, 4,  90, 22.50],
+    ["Cheesebite",        988503,10,44, 800, 18.18],
+    ["Snoozling",        3097040,20,84, 800,  9.52],
+    ["Sugarcane",               0, 8,36, 160,  4.44],
+    ["Godseed",                0,40,164,492,  3.00],
+  ],
+  "Sunflower": [
+    ["Puffercloud",      4935953,14,60,1400, 23.33],
+    ["Plantboy Advance",17776765,12,52,1200, 23.08],
+    ["Duskbloom",          10819, 8,36, 533, 14.81],
+    ["Magic Jellybean",   948753,120,484, 600,  1.24],
+    ["Snoozling",        3097040,20,84, 800,  9.52],
+    ["Sunflower",              0,15,64, 256,  4.00],
+    ["All-in Aloe",      6574489,27,112,400,  3.57],
+    ["Godseed",                0,40,164,492,  3.00],
+  ],
+  "Wheat": [
+    ["Dustgrain",              0, 0, 4, 100, 25.00],
+    ["Duskbloom",          10819, 8,36, 267,  7.42],
+    ["Wheat",                  0, 8,36, 128,  3.56],
+    ["Plantboy Advance",17776765,12,52, 122,  2.35],
+    ["All-in Aloe",      6574489,27,112,200,  1.79],
+    ["Godseed",                0,40,164,246,  1.50],
+  ],
+  "Wild Rose": [
+    ["Noctilume",        1927624, 4,20,1600, 80.00],
+    ["Witherbloom",            0, 0, 4, 300, 75.00],
+    ["Stoplight Petal", 11515595,12,52,3200, 61.54],
+    ["Zombud",            699564,16,68,2800, 41.18],
+    ["Thunderling",      2200417,16,68,2400, 35.29],
+    ["CinderShade",        23503, 8,36, 800, 22.22],
+    ["Thornshade",         12722, 8,36, 800, 22.22],
+    ["Chloronite",       3043509,10,44, 400,  9.09],
+    ["Wild Rose",              0,15,64, 256,  4.00],
+    ["Godseed",                0,40,164,492,  3.00],
+  ],
+};
+
+// Max mutations that fit in a 100-cell plot (scraped from greenhouse.skyshards.com)
+// Base crops (Carrot, Wheat, etc.) are plain 1×1 so 100 fit per 100 cells
+const MAX_PER_PLOT = {
+  // mutations scraped via solver
+  "Ashwreath":52,"All-in Aloe":16,"Blastberry":16,"Cheesebite":16,
+  "Chloronite":16,"Chocoberry":16,"Choconut":72,"Chorus Fruit":16,
+  "Cindershade":16,"CinderShade":16,"Coalroot":16,"Creambloom":16,
+  "Devourer":16,"Do-not-eat-shroom":16,
+  "Duskbloom":16,"Dustgrain":72,"Fleshtrap":16,"Glasscorn":9,
+  "Gloomgourd":72,"Godseed":9,"Magic Jellybean":16,"Noctilume":9,
+  "Phantomleaf":16,"PlantBoy Advance":4,"Plantboy Advance":4,"Puffercloud":11,
+  "Scourroot":72,"Shadevine":72,"Snoozling":4,"Soggybud":52,"Startlevine":16,
+  "Stoplight Petal":4,"Thunderling":13,"Timestalk":16,"Veilshroom":72,
+  "Witherbloom":52,"Zombud":16,"Thornshade":16,
+  // base crops — plain 1×1 tiles, 100 per 100-cell plot
+  "Carrot":100,"Wheat":100,"Potato":100,"Melon":100,"Pumpkin":100,
+  "Cactus":100,"Netherwart":100,"Nether Wart":100,"Sugarcane":100,
+  "Cocoa Bean":100,"Moonflower":100,"Sunflower":100,"Wild Rose":100,
+  "Brown Mushroom":100,"Red Mushroom":100,
+};
+// Scale 100-cell baseline to actual plot size
+function getMutFits(mutName, plotTiles) {
+  const base = MAX_PER_PLOT[mutName] || 100;
+  return Math.max(1, Math.round(base * plotTiles / 100));
+}
+
+const EMOJI = {
+  "Mushroom":"🍄","Cactus":"🌵","Carrot":"🥕","Cocoa Bean":"🍫",
+  "Melon":"🍉","Moonflower":"🌙","Netherwart":"🔴","Potato":"🥔",
+  "Pumpkin":"🎃","Sugarcane":"🍬","Sunflower":"🌻","Wheat":"🌾","Wild Rose":"🌹"
+};
+
+const ALL_TABS = ["Mushroom","Cactus","Carrot","Cocoa Bean","Melon","Moonflower",
+  "Netherwart","Potato","Pumpkin","Sugarcane","Sunflower","Wheat","Wild Rose"];
+
+// Merge Brown + Red mushroom — deduplicate by name, keep higher drops/hr
+function getMushroomData() {
+  const m = {};
+  for (const crop of ["Brown Mushroom","Red Mushroom"]) {
+    for (const r of RAW[crop]) {
+      if (!m[r[0]] || r[5] > m[r[0]][5]) m[r[0]] = [...r];
+    }
+  }
+  return Object.values(m).sort((a,b)=>b[5]-a[5]);
+}
+
+function getCropData(tab) {
+  return tab === "Mushroom" ? getMushroomData() : (RAW[tab]||[]).map(r=>[...r]);
+}
+
+// ── STATE ──
+const S = { plotTiles:100, activeTab:"Mushroom", sortCol:6, sortDir:-1,
+            jellybeanEnabled:false, jellybeanMult:1 };
+const PLOT_TILES = 100; // fixed 10×10 plot
+
+// ── RENDER ──
+function buildTabs() {
+  document.getElementById("tabsWrap").innerHTML = ALL_TABS.map(t => {
+    const em = EMOJI[t] || "🌿";
+    const isMush = t === "Mushroom";
+    return `<button class="tab-btn${isMush?" mush":""}${t===S.activeTab?" active":""}" onclick="switchTab('${t}')">${em} ${t}</button>`;
+  }).join("");
+}
+
+function renderTab() {
+  const tab = S.activeTab;
+  const el = document.getElementById("tc-"+tab.replace(/ /g,"_"));
+  if (!el) return;
+
+  // Show/hide
+  document.querySelectorAll(".tab-content").forEach(e=>e.classList.remove("active"));
+  el.classList.add("active");
+
+  const plotTiles = PLOT_TILES;
+  const data = getCropData(tab);
+
+  // Per-mutation fits (scaled from 100-cell baseline)
+  const fitsFor = r => getMutFits(r[0], plotTiles);
+  const jbMult = r => (S.jellybeanEnabled && r[0]==="Magic Jellybean") ? S.jellybeanMult : 1;
+  const effectiveDph = r => r[5] * jbMult(r);
+  const plotTotal = r => effectiveDph(r) * fitsFor(r);
+
+  // Sort — col 6 = plotTotal (virtual)
+  let sorted = [...data];
+  if (S.sortCol === 6) {
+    sorted.sort((a,b)=>S.sortDir*(plotTotal(a) - plotTotal(b)));
+  } else {
+    sorted.sort((a,b)=>{
+      const av = a[S.sortCol], bv = b[S.sortCol];
+      return S.sortDir*(typeof av==="number" ? bv-av : String(bv).localeCompare(String(av)));
+    });
+  }
+
+  // Best = highest plotTotal drops/hr
+  const best = data.reduce((bst,r)=>plotTotal(r)>plotTotal(bst)?r:bst, data[0]);
+  const bestFits = best ? fitsFor(best) : 1;
+  const bestTotal = best ? plotTotal(best).toFixed(2) : 0;
+
+  const thC = i => S.sortCol===i ? "s" : "";
+  const arr = i => S.sortCol===i ? (S.sortDir===-1?"↓":"↑") : "↕";
+
+  el.innerHTML = `
+    <div class="cfg">
+      <div class="ci"><label>Sort By</label>
+        <select onchange="onSort(this.value)">
+          <option value="6"${S.sortCol==6?" selected":""}>Plot Total / hr</option>
+          <option value="5"${S.sortCol==5?" selected":""}>Drops / Hour</option>
+          <option value="4"${S.sortCol==4?" selected":""}>Drops / Mutation</option>
+          <option value="3"${S.sortCol==3?" selected":""}>Grow Time</option>
+          <option value="1"${S.sortCol==1?" selected":""}>Ingredient Cost</option>
+          <option value="0"${S.sortCol==0?" selected":""}>Name</option>
+        </select></div>
+      <div class="ci" style="flex-direction:row;align-items:center;gap:8px;padding-top:18px">
+        <input type="checkbox" id="jbCheck" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer"
+          ${S.jellybeanEnabled?"checked":""} onchange="onJellybean(this.checked)">
+        <label for="jbCheck" style="font-size:.82rem;color:${S.jellybeanEnabled?"var(--accent)":"var(--muted)"};cursor:pointer;white-space:nowrap">🍬 Jellybean</label>
+        ${S.jellybeanEnabled ? `<input type="number" min="1" max="10" value="${S.jellybeanMult}"
+          style="width:58px;background:var(--panel2);border:1px solid var(--accent);border-radius:6px;color:var(--text);padding:5px 7px;font-size:.88rem;outline:none"
+          onchange="onJellybeanMult(this.value)" oninput="onJellybeanMult(this.value)">
+        <span style="font-size:.75rem;color:var(--muted)">× mult</span>` : ""}
+      </div>
+      <div class="cfg-note">${tab==="Mushroom"
+        ? "🍄 <b>Brown + Red</b> mushrooms merged &nbsp;·&nbsp; 10×10 plot (100 cells)"
+        : `10×10 plot (100 cells) · Best fits: <b>${bestFits}</b>`}</div>
+    </div>
+
+    ${best ? `<div class="banner pos">
+      <div>
+        <div class="blabel">Best Mutation for This Crop (Plot-Aware)</div>
+        <div class="bname">${best[0]}</div>
+      </div>
+      <div class="bstats">
+        <b>${effectiveDph(best).toFixed(2)}</b> drops/hr each &nbsp;·&nbsp;
+        <b>${bestTotal}</b> total drops/hr for full plot (${bestFits} plant${bestFits>1?"s":""})<br>
+        Ingredient Cost: <b>${best[1]===0?"Free":best[1].toLocaleString()+" 🪙"}</b> &nbsp;·&nbsp;
+        Grows in <b>${best[3]}h</b> over <b>${best[2]}</b> stages
+      </div>
+    </div>` : ""}
+
+    <div class="tw"><table>
+      <thead><tr>
+        <th class="${thC(0)}" onclick="sortBy(0)">Mutation <span>${arr(0)}</span></th>
+        <th class="${thC(1)}" onclick="sortBy(1)">Ingredient Cost <span>${arr(1)}</span></th>
+        <th class="${thC(2)}" onclick="sortBy(2)">Stages <span>${arr(2)}</span></th>
+        <th class="${thC(3)}" onclick="sortBy(3)">Time <span>${arr(3)}</span></th>
+        <th class="${thC(4)}" onclick="sortBy(4)">Drops/Mutation <span>${arr(4)}</span></th>
+        <th class="${thC(5)}" onclick="sortBy(5)">Drops/Hour <span>${arr(5)}</span></th>
+        <th class="${thC(6)}" onclick="sortBy(6)">Plot Total/hr <span>${arr(6)}</span></th>
+      </tr></thead>
+      <tbody>
+        ${sorted.map((r,i)=>{
+          const [name,cost,stages,timeH] = r;
+          const mult = jbMult(r);
+          const drops = r[4] * mult;
+          const dph = effectiveDph(r);
+          const mFits = fitsFor(r);
+          const pt = (dph*mFits).toFixed(2);
+          const isBest = best && name===best[0];
+          const isFree = cost===0;
+          const isJB = name==="Magic Jellybean" && S.jellybeanEnabled;
+          let badge = isBest ? '<span class="badge b-best">BEST</span>' : (i<3?'<span class="badge b-top">TOP '+(i+1)+'</span>':"");
+          if (isFree) badge += '<span class="badge b-free">FREE</span>';
+          if (isJB) badge += `<span class="badge" style="background:#1a1a3a;color:#a78bfa">×${S.jellybeanMult}</span>`;
+          const dphCls = dph>=50?"vg":dph>=10?"vy":"vm";
+          return `<tr>
+            <td class="mn">${name}${badge}<\/td>
+            <td class="${isFree?"vg":"vm"}">${isFree?"Free":cost.toLocaleString()+" 🪙"}<\/td>
+            <td class="vm">${stages}<\/td>
+            <td class="vm">${timeH}h<\/td>
+            <td>${drops.toLocaleString()}<\/td>
+            <td class="${dphCls}">${dph.toFixed(2)}<\/td>
+            <td class="${isBest?"vg":"vm"}">${pt} <span style="font-size:.72rem;color:var(--muted)">(×${mFits})<\/span><\/td>
+          <\/tr>`;
+        }).join("")}
+      </tbody>
+    </table></div>`;
+}
+
+function switchTab(tab) {
+  S.activeTab = tab;
+  S.sortCol = 6; S.sortDir = -1;
+  buildTabs();
+  renderTab();
+}
+
+function sortBy(col) {
+  if (S.sortCol===col) S.sortDir*=-1;
+  else { S.sortCol=col; S.sortDir=-1; }
+  renderTab();
+}
+
+function onSort(val) { S.sortCol=parseInt(val); S.sortDir=-1; renderTab(); }
+function onJellybean(checked) { S.jellybeanEnabled=checked; if(!checked) S.jellybeanMult=1; renderTab(); }
+function onJellybeanMult(val) { S.jellybeanMult=Math.max(1,Math.min(10,parseInt(val)||1)); renderTab(); }
+
+// ── INIT ──
+document.getElementById("tabsWrap").innerHTML = ALL_TABS.map(t=>{
+  const em=EMOJI[t]||"🌿", isMush=t==="Mushroom";
+  return `<button class="tab-btn${isMush?" mush":""}${t===S.activeTab?" active":""}" onclick="switchTab('${t}')">${em} ${t}</button>`;
+}).join("");
+
+document.getElementById("tabContents").innerHTML = ALL_TABS.map(t=>
+  `<div class="tab-content${t===S.activeTab?" active":""}" id="tc-${t.replace(/ /g,"_")}"></div>`
+).join("");
+
+renderTab();
+</script>
+</body>
+</html>
